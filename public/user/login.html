@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Chat Web</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h3 class="text-center mb-4 text-primary fw-bold">Chat Web Login</h3>
+
+        <form id="loginForm">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" id="email" class="form-control" required placeholder="name@example.com">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" id="password" class="form-control" required placeholder="******">
+            </div>
+
+            <div id="errorMessage" class="alert alert-danger d-none text-center p-2"></div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2" id="btnLogin">Đăng nhập</button>
+        </form>
+
+        <div class="mt-4 text-center border-top pt-3">
+            <p class="small text-muted">Chưa có tài khoản?</p>
+            <a href="/user/register.html" class="btn btn-outline-success btn-sm">Đăng ký tài khoản mới</a>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const btnLogin = document.getElementById('btnLogin');
+        const errorMsg = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.classList.add('d-none');
+            btnLogin.disabled = true;
+            btnLogin.innerText = "Đang xử lý...";
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/auth/login/user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // --- ĐĂNG NHẬP THÀNH CÔNG ---
+
+                    // 1. Lưu Token và User Info vào LocalStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // 2. Chuyển hướng sang trang Home
+                    window.location.href = '/user/home.html';
+                } else {
+                    // --- ĐĂNG NHẬP THẤT BẠI ---
+                    errorMsg.innerText = data.message || 'Đăng nhập thất bại';
+                    errorMsg.classList.remove('d-none');
+                    btnLogin.disabled = false;
+                    btnLogin.innerText = "Đăng nhập";
+                }
+
+            } catch (err) {
+                console.error(err);
+                errorMsg.innerText = "Lỗi kết nối Server!";
+                errorMsg.classList.remove('d-none');
+                btnLogin.disabled = false;
+                btnLogin.innerText = "Đăng nhập";
+            }
+        });
+    </script>
+</body>
+
+</html>
