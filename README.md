@@ -53,8 +53,18 @@ project-root/\
 - Người dùng đăng nhập bằng email và mật khẩu
 - Server trả về **JWT Token**
 ### <a name="chat-realtime"></a>4️⃣ Chat realtime
-- Client kết nối Socket.io sau khi đăng nhập
-- Gửi / nhận tin nhắn realtime
+- Client tham gia room chat (1-1 hoặc nhóm)
+- Gửi tin nhắn qua Socket.io
+- Server lưu tin nhắn vào database
+- Server emit tin nhắn realtime đến các client liên quan
+- Client gửi ACK xác nhận:
+Đã nhận
+Đã xem
+### <a name="chat-realtime"></a>5️⃣Gửi file 
+- Client chọn file (< 1MB)
+- Client upload file qua HTTP
+- Server trả về URL file
+- Client gửi tin nhắn chứa URL qua Socket.io
 -----
 ## <a name="cài-đặt-chạy-project"></a>⚙️ Cài đặt & chạy project
 ### <a name="clone-project"></a>1️⃣ Clone project
