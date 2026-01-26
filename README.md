@@ -1,114 +1,73 @@
-# Real-time Chat Application
+💬 Chat Web Realtime (Node.js + Socket.io)
+📌 Giới thiệu
+Dự án Chat Web Realtime là một ứng dụng chat thời gian thực xây dựng theo mô hình Client – Server, sử dụng Node.js + Express + Socket.io. Ứng dụng hỗ trợ đăng ký tài khoản, xác thực email bằng OTP, đăng nhập, và chat realtime giữa các người dùng.
+Dự án phù hợp cho mục đích đồ án môn Lập trình mạng / Ứng dụng mạng thời gian thực.
 
-Ứng dụng nhắn tin thời gian thực hỗ trợ Chat 1-1, Chat Nhóm và Gửi file đa phương tiện.
-Dự án được xây dựng bằng **Node.js**, **Socket.io** và **Supabase**.
+🧱 Công nghệ sử dụng
+Backend
+Node.js
+Express.js
+Socket.io (Realtime)
+JWT (Authentication)
+bcrypt (Hash mật khẩu)
+Supabase (PostgreSQL)
+Resend / Email Service (Gửi OTP)
+Frontend
+HTML5
+CSS3
+JavaScript (Vanilla)
+Bootstrap 5
 
-## 🚀 Tính năng chính
+📁 Cấu trúc thư mục
+project-root/
+│
+├── config/          # Cấu hình hệ thống (DB, mail, JWT)
+├── controllers/    # Xử lý request / response
+├── middlewares/    # Middleware xác thực, bảo mật
+├── public/
+│   └── user/        # Giao diện client (HTML)
+│       ├── login.html
+│       ├── register.html
+│       └── home.html
+├── repositories/   # Làm việc trực tiếp với database
+├── routes/         # Định tuyến API
+├── services/       # Xử lý nghiệp vụ (auth, OTP, chat)
+├── sockets/        # Xử lý Socket.io realtime
+├── utils/          # Hàm dùng chung (OTP, email template)
+├── .env.example    # Mẫu biến môi trường
+├── package.json
+└── server.js       # File khởi động server
 
-- **Xác thực:** Đăng ký, Đăng nhập (JWT).
-- **Chat Real-time:** Nhắn tin tức thì không cần load lại trang.
-- **Phân loại Chat:**
-  - **Chat 1-1 (Private):** Trò chuyện riêng tư.
-  - **Chat Nhóm (Group):** Tạo nhóm, thêm thành viên, quản lý (Admin có quyền xóa thành viên/giải tán nhóm).
-- **Trạng thái:**
-  - Online / Offline / Last seen (Lần cuối truy cập).
-  - Typing Indicator (Đang soạn tin...).
-  - Message Status (Đã gửi / Đã xem).
-- **Đa phương tiện:**
-  - Gửi hình ảnh, video, âm thanh.
-  - Gửi tệp tin (Word, PDF, ZIP...).
-  - Hỗ trợ xem trước (Preview) media ngay trong khung chat.
+🔄 Luồng hoạt động chính
+1️⃣ Đăng ký tài khoản
+Người dùng nhập thông tin đăng ký
+Server lưu tài khoản ở trạng thái chưa xác thực
+Gửi mã OTP qua email
+2️⃣ Xác thực OTP
+Người dùng nhập OTP
+Server kiểm tra OTP và kích hoạt tài khoản
+3️⃣ Đăng nhập
+Người dùng đăng nhập bằng email và mật khẩu
+Server trả về JWT Token
+4️⃣ Chat realtime
+Client kết nối Socket.io sau khi đăng nhập
+Gửi / nhận tin nhắn realtime
 
-## 🛠 Công nghệ sử dụng
+⚙️ Cài đặt & chạy project
+1️⃣ Clone project
+git clone https://github.com/HPhi1808/WebChat.git
+2️⃣ Cài đặt thư viện
+npm install
+3️⃣ Tạo file môi trường
+cp .env.example .env
+Điền các giá trị cần thiết trong file .env
+4️⃣ Chạy server
+npm start
+Server mặc định chạy tại:
+http://localhost:PORT
 
-- **Backend:** Node.js, Express.js.
-- **Real-time Engine:** Socket.io (WebSocket).
-- **Database:** Supabase (PostgreSQL).
-- **Storage:** Supabase Storage (Lưu trữ file).
-- **Frontend:** HTML5, CSS3, JavaScript (Vanilla), Bootstrap 5.
-
-## ⚙️ Cài đặt & Chạy dự án
-
-### 1. Clone dự án
-
-    git clone https://github.com/HPhi1808/WebChat.git
-### 2. Cài đặt thư viện
-    npm install
-
-### 3. Cấu hình biến môi trường (.env)
-Tạo file .env
-
-    copy .env.example .env
-và gán giá trị cho các Key trong file .env
-
-### 4. Cấu hình Database (SQL)
-Chạy các lệnh SQL sau trong Supabase Editor để tạo bảng:
-
--- 1. Kích hoạt Extension UUID (Bắt buộc để tạo ID ngẫu nhiên)
-
-    create extension if not exists "uuid-ossp";
-
--- 2. Bảng Users
-
-    create table public.users (
-      id uuid default uuid_generate_v4() primary key,
-      email text unique not null,
-      password text not null,
-      full_name text,
-      avatar_url text,
-      is_online boolean default false,
-      last_seen timestamptz default now()
-    );
-
--- 3. Bảng OTP Codes (Dùng cho xác thực)
-
-    create table public.otp_codes (
-      id uuid not null default uuid_generate_v4(),
-      email character varying(255) not null,
-      code character varying(10) not null,
-      expires_at timestamp with time zone not null,
-      created_at timestamp with time zone null default now(),
-      constraint otp_codes_pkey primary key (id)
-    ) TABLESPACE pg_default;
-
--- 4. Bảng Conversations
-
-    create table public.conversations (
-      id uuid default uuid_generate_v4() primary key,
-      type text check (type in ('private', 'group')),
-      name text,
-      image_url text,
-      last_message_id uuid,
-      last_message_at timestamptz default now(),
-      created_at timestamptz default now()
-    );
-
--- 5. Bảng Conversation Members
-
-    create table public.conversation_members (
-      conversation_id uuid references conversations(id) on delete cascade,
-      user_id uuid references users(id) on delete cascade,
-      role text default 'member', -- 'admin' hoặc 'member'
-      joined_at timestamptz default now(),
-      primary key (conversation_id, user_id)
-    );
-
--- 6. Bảng Messages
-
-    create table public.messages (
-      id uuid default uuid_generate_v4() primary key,
-      conversation_id uuid references conversations(id) on delete cascade,
-      sender_id uuid references users(id) on delete set null,
-      content text,
-      type text default 'text', -- text, image, video, audio, file
-      file_name text,
-      file_size text,
-      status text default 'sent', -- sent, read
-      created_at timestamptz default now()
-    );
-
-  
-
-### 5. Chạy dự án
-    npm start
-Truy cập: `http://localhost:3000`
+🔐 Bảo mật
+Mật khẩu được hash bằng bcrypt
+Xác thực bằng JWT
+OTP có thời hạn
+Các API bảo vệ bằng middleware
