@@ -61,7 +61,7 @@ project-root/\
 Đã nhận
 Đã xem
 ### <a name="chat-realtime"></a>5️⃣Gửi file 
-- Client chọn file (< 1MB)
+- Client chọn file (< 50MB)
 - Client upload file qua HTTP
 - Server trả về URL file
 - Client gửi tin nhắn chứa URL qua Socket.io
@@ -89,3 +89,4 @@ http://localhost:PORT
 - OTP có thời hạn
 - Các API bảo vệ bằng middleware
 
+Link web deploy: https://chat.uth.asia
